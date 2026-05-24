@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Upload, Check, Loader2, Copy } from 'lucide-react';
 
-export default function App() {
+export default function App({ uploadUrl }) {
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -17,7 +17,7 @@ export default function App() {
     formData.append('file', fileToUpload);
 
     try {
-      const response = await fetch('https://model.tattty.com', {
+      const response = await fetch(uploadUrl, {
         method: 'POST',
         body: formData,
       });
@@ -67,7 +67,7 @@ export default function App() {
         <div className="mt-6 flex flex-col gap-4">
           <div className="bg-neutral-100 p-3 rounded-lg border border-black/10 flex items-center justify-between gap-2">
             <span className="truncate font-mono text-[11px] text-neutral-600 flex-1">
-              {result ? result : 'https://model.tattty.com/pending-upload...'}
+              {result ? result : `${uploadUrl}/pending-upload...`}
             </span>
             
             <button 
