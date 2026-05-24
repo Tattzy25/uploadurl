@@ -15,13 +15,10 @@ app.use((req, res, next) => {
 
 app.post('/', (req, res) => {
   const busboy = Busboy({ headers: req.headers });
-  const form = new FormData();
 
-  busboy.on('file', (name, stream, info) => {
+  busboy.on('file', async (name, stream, info) => {
+    const form = new FormData();
     form.append(name, stream, info.filename);
-  });
-
-  busboy.on('finish', async () => {
     const upstream = await fetch(process.env.WORKER_URL, {
       method: 'POST',
       body: form,

@@ -1,9 +1,9 @@
 {
   "name": "upload-proxy",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node src/server.js"
   },
   "dependencies": {
     "busboy": "^1.6.0",
