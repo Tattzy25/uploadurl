@@ -52,8 +52,8 @@ app.get('/', (req, res) => {
       };
 
       return (
-        <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-white border border-black p-8 rounded-2xl shadow-sm">
+        <div>
+          <div className="w-full bg-white p-8">
             {!uploading && (
               <div
                 onClick={() => !result && fileRef.current?.click()}
@@ -69,10 +69,10 @@ app.get('/', (req, res) => {
               </div>
             )}
             <div className="mt-6 flex flex-col gap-4">
-              <div className="bg-neutral-100 p-3 rounded-lg border border-black/10 flex items-center justify-between gap-2">
-                <span className="truncate font-mono text-xs text-neutral-600 flex-1">{result || 'pending upload...'}</span>
-                <button onClick={handleCopy} disabled={!result} className={"p-2 rounded-md " + (!result ? "text-neutral-300 cursor-not-allowed" : "text-black hover:bg-black/5")}>
-                  {copied ? "✓" : "⧉"}
+              <div className="bg-black rounded-xl p-4 flex items-center justify-between gap-3">
+                <span className="truncate font-mono text-xs text-white flex-1">{result || 'Convert : ZIP, PNG, JPEG, WEBP, JPG'}</span>
+                <button onClick={handleCopy} disabled={!result} className={"shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all " + (!result ? "bg-white/10 text-white/30 cursor-not-allowed" : "bg-white text-black hover:bg-white/90")}>
+                  {copied ? "Copied!" : "Copy"}
                 </button>
               </div>
               {result && (
