@@ -20,67 +20,73 @@ app.get('/', (req, res) => {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Upload</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
   <div id="root"></div>
-  <script type="module">
-    import { createElement as h, useState, useRef } from 'https://esm.sh/react@18';
-    import { createRoot } from 'https://esm.sh/react-dom@18/client';
-    import { Upload, Check, Loader2, Copy } from 'https://esm.sh/lucide-react@latest';
-
+  <script type="text/babel">
     function App() {
-      const [uploading, setUploading] = useState(false);
-      const [result, setResult] = useState(null);
-      const [copied, setCopied] = useState(false);
-      const fileInputRef = useRef(null);
+      const [uploading, setUploading] = React.useState(false);
+      const [result, setResult] = React.useState(null);
+      const [copied, setCopied] = React.useState(false);
+      const fileRef = React.useRef(null);
 
-      const handleUpload = async (fileToUpload) => {
+      const handleUpload = async (file) => {
         setUploading(true);
         setResult(null);
-        const formData = new FormData();
-        formData.append('file', fileToUpload);
-        const response = await fetch('/', { method: 'POST', body: formData });
-        const data = await response.json();
+        const fd = new FormData();
+        fd.append('file', file);
+        const res = await fetch('/', { method: 'POST', body: fd });
+        const data = await res.json();
         setResult(data.url);
         setUploading(false);
       };
 
       const handleCopy = async () => {
-        if (result) {
-          await navigator.clipboard.writeText(result);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        }
+        await navigator.clipboard.writeText(result);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
       };
 
-      return h('div', { className: 'min-h-screen bg-neutral-50 flex items-center justify-center p-4 font-sans' },
-        h('div', { className: 'w-full max-w-sm bg-white border border-black p-8 rounded-2xl shadow-sm' },
-          !uploading && h('div', {
-            onClick: () => !result && fileInputRef.current?.click(),
-            className: \`cursor-pointer border-2 border-dashed border-black/20 hover:border-black transition-all rounded-xl py-12 flex flex-col items-center justify-center gap-3 \${result ? 'opacity-50 pointer-events-none' : ''}\`
-          },
-            h(Upload, { className: 'w-5 h-5 text-black/50' }),
-            h('span', { className: 'text-sm font-medium text-black' }, 'Upload File'),
-            h('input', { type: 'file', ref: fileInputRef, className: 'hidden', onChange: (e) => e.target.files[0] && handleUpload(e.target.files[0]) })
-          ),
-          uploading && h('div', { className: 'py-16 flex flex-col items-center justify-center gap-3 border-2 border-dashed border-black/20 rounded-xl' },
-            h(Loader2, { className: 'w-6 h-6 animate-spin text-black' })
-          ),
-          h('div', { className: 'mt-6 flex flex-col gap-4' },
-            h('div', { className: 'bg-neutral-100 p-3 rounded-lg border border-black/10 flex items-center justify-between gap-2' },
-              h('span', { className: 'truncate font-mono text-[11px] text-neutral-600 flex-1' }, result ? result : 'pending upload...'),
-              h('button', { onClick: handleCopy, disabled: !result, className: \`p-2 rounded-md transition-colors \${!result ? 'text-neutral-300 cursor-not-allowed' : 'text-black hover:bg-black/5'}\` },
-                copied ? h(Check, { className: 'w-4 h-4 text-green-600' }) : h(Copy, { className: 'w-4 h-4' })
-              )
-            ),
-            result && h('button', { onClick: () => setResult(null), className: 'w-full text-[11px] text-neutral-400 hover:text-black transition-colors py-1' }, 'Upload another file')
-          )
-        )
+      return (
+        <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-white border border-black p-8 rounded-2xl shadow-sm">
+            {!uploading && (
+              <div
+                onClick={() => !result && fileRef.current?.click()}
+                className={"cursor-pointer border-2 border-dashed border-black/20 hover:border-black transition-all rounded-xl py-12 flex flex-col items-center justify-center gap-3" + (result ? " opacity-50 pointer-events-none" : "")}
+              >
+                <span className="text-sm font-medium text-black">Upload File</span>
+                <input type="file" ref={fileRef} className="hidden" onChange={(e) => e.target.files[0] && handleUpload(e.target.files[0])} />
+              </div>
+            )}
+            {uploading && (
+              <div className="py-16 flex items-center justify-center border-2 border-dashed border-black/20 rounded-xl">
+                <span className="text-sm text-black animate-pulse">Uploading...</span>
+              </div>
+            )}
+            <div className="mt-6 flex flex-col gap-4">
+              <div className="bg-neutral-100 p-3 rounded-lg border border-black/10 flex items-center justify-between gap-2">
+                <span className="truncate font-mono text-xs text-neutral-600 flex-1">{result || 'pending upload...'}</span>
+                <button onClick={handleCopy} disabled={!result} className={"p-2 rounded-md " + (!result ? "text-neutral-300 cursor-not-allowed" : "text-black hover:bg-black/5")}>
+                  {copied ? "✓" : "⧉"}
+                </button>
+              </div>
+              {result && (
+                <button onClick={() => setResult(null)} className="w-full text-xs text-neutral-400 hover:text-black py-1">
+                  Upload another file
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       );
     }
 
-    createRoot(document.getElementById('root')).render(h(App));
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
 </body>
 </html>`);
