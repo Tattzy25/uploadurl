@@ -5,6 +5,53 @@ const fetch = require('node-fetch');
 
 const app = express();
 
+const ZOHO_MCP = 'https://dc2-920682947.zohomcp.com/mcp/f8d2c6cb3b9eea6a7f1394e76c7bd095/message';
+
+async function logToZoho({ timestamp, fileName, fileType, status, url, customerId }) {
+  const zipUrl   = fileType === 'zip' ? url : '';
+  const imageUrl = fileType !== 'zip' ? url : '';
+
+  const response = await fetch(ZOHO_MCP, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json, text/event-stream',
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: Date.now(),
+      method: 'tools/call',
+      params: {
+        name: 'ZohoSheet_add_records_to_worksheet',
+        arguments: {
+          path_variables: {
+            addrecordstoworksheet: 'v2',
+            resource_id: process.env.RSRC_ID,
+          },
+          query_params: {
+            method: 'worksheet.records.add',
+            worksheet_name: 'Sheet1',
+            json_data: [
+              {
+                'Timestamp': timestamp,
+                'File Name - UPLOAD': fileName,
+                'File Type - UPLOAD': fileType,
+                'Stat - UPLOAD': status,
+                'Zip URL - UPLOAD': zipUrl,
+                'Image URL - UPLOAD': imageUrl,
+                'Customer ID': customerId,
+                'Source ID': process.env.SOURCE_ID,
+              },
+            ],
+          },
+        },
+      },
+    }),
+  });
+  const text = await response.text();
+  console.log('Zoho log response:', text);
+}
+
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -14,6 +61,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
+  const customer = req.query.customer || 'guest';
   res.send(`<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,7 +72,12 @@ app.get('/', (req, res) => {
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>window.__CUSTOMER__ = "${customer}";</script>
 </head>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; font-family: sans-serif; }
+</style>
 <body>
   <div id="root"></div>
   <script type="text/babel">
@@ -38,6 +91,7 @@ app.get('/', (req, res) => {
         setUploading(true);
         setResult(null);
         const fd = new FormData();
+        fd.append('customerId', window.__CUSTOMER__);
         fd.append('file', file);
         const res = await fetch('/', { method: 'POST', body: fd });
         const data = await res.json();
@@ -52,35 +106,65 @@ app.get('/', (req, res) => {
       };
 
       return (
-        <div>
-          <div className="w-full bg-white p-8">
-            {!uploading && (
-              <div
-                onClick={() => !result && fileRef.current?.click()}
-                className={"cursor-pointer border-2 border-dashed border-black/20 hover:border-black transition-all rounded-xl py-12 flex flex-col items-center justify-center gap-3" + (result ? " opacity-50 pointer-events-none" : "")}
-              >
-                <span className="text-sm font-medium text-black">Upload File</span>
-                <input type="file" ref={fileRef} className="hidden" onChange={(e) => e.target.files[0] && handleUpload(e.target.files[0])} />
-              </div>
-            )}
-            {uploading && (
-              <div className="py-16 flex items-center justify-center border-2 border-dashed border-black/20 rounded-xl">
-                <span className="text-sm text-black animate-pulse">Uploading...</span>
-              </div>
-            )}
-            <div className="mt-6 flex flex-col gap-4">
-              <div className="bg-black rounded-xl p-4 flex items-center justify-between gap-3">
-                <span className="truncate font-mono text-xs text-white flex-1">{result || 'Convert : ZIP, PNG, JPEG, WEBP, JPG'}</span>
-                <button onClick={handleCopy} disabled={!result} className={"shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all " + (!result ? "bg-white/10 text-white/30 cursor-not-allowed" : "bg-white text-black hover:bg-white/90")}>
-                  {copied ? "Copied!" : "Copy"}
-                </button>
-              </div>
-              {result && (
-                <button onClick={() => setResult(null)} className="w-full text-xs text-neutral-400 hover:text-black py-1">
-                  Upload another file
-                </button>
-              )}
+        <div style={{width:'100%',padding:'16px'}}>
+          {!uploading && (
+            <div
+              onClick={() => !result && fileRef.current?.click()}
+              style={{
+                cursor: result ? 'default' : 'pointer',
+                border: '2px dashed #ccc',
+                borderRadius: '12px',
+                padding: '48px 16px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                opacity: result ? 0.4 : 1,
+                pointerEvents: result ? 'none' : 'auto',
+                transition: 'border-color 0.2s',
+              }}
+            >
+              <span style={{fontSize:'14px',fontWeight:'600',color:'#000'}}>Upload File</span>
+              <input type="file" ref={fileRef} style={{display:'none'}} onChange={(e) => e.target.files[0] && handleUpload(e.target.files[0])} />
             </div>
+          )}
+          {uploading && (
+            <div style={{border:'2px dashed #ccc',borderRadius:'12px',padding:'48px 16px',display:'flex',alignItems:'center',justifyContent:'center'}}>
+              <span style={{fontSize:'14px',color:'#000'}}>Uploading...</span>
+            </div>
+          )}
+          <div style={{marginTop:'16px',display:'flex',flexDirection:'column',gap:'12px'}}>
+            <div style={{background:'#000',borderRadius:'12px',padding:'14px 16px',display:'flex',alignItems:'center',gap:'12px',minWidth:0}}>
+              <span style={{fontFamily:'monospace',fontSize:'12px',color:'#fff',flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+                {result || 'Convert : ZIP, PNG, JPEG, WEBP, JPG'}
+              </span>
+              <button
+                onClick={handleCopy}
+                disabled={!result}
+                style={{
+                  flexShrink:0,
+                  padding:'6px 14px',
+                  borderRadius:'8px',
+                  fontSize:'12px',
+                  fontWeight:'600',
+                  border:'none',
+                  cursor: result ? 'pointer' : 'not-allowed',
+                  background: result ? '#fff' : 'rgba(255,255,255,0.15)',
+                  color: result ? '#000' : 'rgba(255,255,255,0.3)',
+                }}
+              >
+                {copied ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+            {result && (
+              <button
+                onClick={() => setResult(null)}
+                style={{width:'100%',padding:'10px',fontSize:'14px',color:'#000',fontWeight:'600',background:'none',border:'none',cursor:'pointer'}}
+              >
+                Upload another file
+              </button>
+            )}
           </div>
         </div>
       );
@@ -94,17 +178,40 @@ app.get('/', (req, res) => {
 
 app.post('/', (req, res) => {
   const busboy = Busboy({ headers: req.headers });
+  let customerId = 'guest';
+
+  busboy.on('field', (name, value) => {
+    if (name === 'customerId') customerId = value;
+  });
 
   busboy.on('file', async (name, stream, info) => {
+    const fileName = info.filename;
+    const ext = fileName.split('.').pop().toLowerCase();
+    const fileType = ext === 'zip' ? 'zip' : ext;
+    const timestamp = new Date().toISOString();
+
     const form = new FormData();
-    form.append(name, stream, info.filename);
-    const upstream = await fetch(process.env.WORKER_URL, {
-      method: 'POST',
-      body: form,
-      headers: form.getHeaders(),
-    });
-    const data = await upstream.json();
-    res.json(data);
+    form.append(name, stream, fileName);
+
+    let status, url;
+    try {
+      const upstream = await fetch(process.env.WORKER_URL, {
+        method: 'POST',
+        body: form,
+        headers: form.getHeaders(),
+      });
+      const data = await upstream.json();
+      url = data.url;
+      status = 'success';
+      res.json(data);
+    } catch (err) {
+      status = `error: ${err.message}`;
+      console.error('Upload failed:', err.message);
+      res.status(500).json({ error: err.message });
+    }
+
+    logToZoho({ timestamp, fileName, fileType, status, url: url || '', customerId })
+      .catch(err => console.error('Zoho log failed:', err.message));
   });
 
   req.pipe(busboy);
