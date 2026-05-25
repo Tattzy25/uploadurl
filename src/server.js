@@ -71,7 +71,7 @@ app.get('/', (req, res) => {
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&display=swap" rel="stylesheet" />
   <script>window.__CUSTOMER__ = "${customer}";</script>
 </head>
 <style>
@@ -134,10 +134,10 @@ app.get('/', (req, res) => {
               <span style={{fontSize:'14px',color:'#000'}}>Uploading...</span>
             </div>
           )}
-          <div style={{marginTop:'16px',display:'flex',flexDirection:'column',gap:'12px'}}>
-            <div style={{background:'#000',borderRadius:'12px',padding:'14px 16px',display:'flex',alignItems:'center',gap:'12px',minWidth:0}}>
-              <span style={{fontFamily:'monospace',fontSize:'12px',color:'#fff',flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
-                {result || 'Convert : ZIP, PNG, JPEG, WEBP, JPG'}
+          <div style={{marginTop:'100px',display:'flex',flexDirection:'column',gap:'12px'}}>
+            <div style={{border:'2px solid #000',borderRadius:'12px',padding:'14px 16px',display:'flex',alignItems:'center',gap:'12px',minWidth:0,background:'#fff'}}>
+              <span style={{fontFamily:'Orbitron,sans-serif',fontSize:'14px',color:'#000',flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+                {result || 'ZIP · PNG · JPEG · WEBP · JPG'}
               </span>
               <button
                 onClick={handleCopy}
@@ -147,11 +147,12 @@ app.get('/', (req, res) => {
                   padding:'6px 14px',
                   borderRadius:'8px',
                   fontSize:'12px',
-                  fontWeight:'600',
-                  border:'none',
+                  fontWeight:'700',
+                  border:'2px solid #000',
                   cursor: result ? 'pointer' : 'not-allowed',
-                  background: result ? '#fff' : 'rgba(255,255,255,0.15)',
-                  color: result ? '#000' : 'rgba(255,255,255,0.3)',
+                  background: '#fff',
+                  color: result ? '#000' : '#ccc',
+                  fontFamily:'Orbitron,sans-serif',
                 }}
               >
                 {copied ? 'Copied!' : 'Copy'}
