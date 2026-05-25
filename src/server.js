@@ -217,7 +217,7 @@ app.get('/', (req, res) => {
     ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
   <script>
-    const sendHeight = () => window.parent.postMessage({ iframeHeight: document.body.scrollHeight + 20 }, '*');
+    const sendHeight = () => window.parent.postMessage({ iframeHeight: document.body.scrollHeight + 24 }, '*');
     new MutationObserver(sendHeight).observe(document.body, { childList: true, subtree: true, attributes: true });
     window.addEventListener('load', sendHeight);
   </script>
