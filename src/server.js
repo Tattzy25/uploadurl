@@ -34,11 +34,11 @@ async function logToZoho({ timestamp, fileName, fileType, status, url, customerI
             json_data: [
               {
                 'Timestamp': timestamp,
-                'File Name - UPLOAD': fileName,
-                'File Type - UPLOAD': fileType,
-                'Stat - UPLOAD': status,
-                'Zip URL - UPLOAD': zipUrl,
-                'Image URL - UPLOAD': imageUrl,
+                'file_name_upload': fileName,
+                'file_type_upload': fileType,
+                'stat_upload': status,
+                'zip_url_upload': zipUrl,
+                'image_url_upload': imageUrl,
                 'Customer ID': customerId,
                 'Source ID': process.env.SOURCE_ID,
               },
