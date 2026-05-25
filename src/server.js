@@ -106,7 +106,7 @@ app.get('/', (req, res) => {
       };
 
       return (
-        <div style={{width:'100%',maxWidth:'480px',padding:'16px'}}>
+        <div style={{width:'100%',padding:'16px',boxSizing:'border-box'}}>
           {!uploading && (
             <div
               onClick={() => !result && fileRef.current?.click()}
