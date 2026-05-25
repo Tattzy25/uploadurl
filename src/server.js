@@ -77,6 +77,9 @@ app.get('/', (req, res) => {
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: transparent; font-family: sans-serif; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .drag-hint { display: none; }
+  @media (hover: hover) { .drag-hint { display: block; } }
 </style>
 <body>
   <div id="root"></div>
@@ -84,19 +87,28 @@ app.get('/', (req, res) => {
     function App() {
       const [uploading, setUploading] = React.useState(false);
       const [result, setResult] = React.useState(null);
+      const [error, setError] = React.useState(null);
       const [copied, setCopied] = React.useState(false);
+      const [dragging, setDragging] = React.useState(false);
       const fileRef = React.useRef(null);
 
       const handleUpload = async (file) => {
         setUploading(true);
         setResult(null);
+        setError(null);
         const fd = new FormData();
         fd.append('customerId', window.__CUSTOMER__);
         fd.append('file', file);
-        const res = await fetch('/', { method: 'POST', body: fd });
-        const data = await res.json();
-        setResult(data.url);
-        setUploading(false);
+        try {
+          const res = await fetch('/', { method: 'POST', body: fd });
+          if (!res.ok) throw new Error();
+          const data = await res.json();
+          setResult(data.url);
+        } catch (e) {
+          setError('Upload failed. Try again.');
+        } finally {
+          setUploading(false);
+        }
       };
 
       const handleCopy = async () => {
@@ -105,14 +117,28 @@ app.get('/', (req, res) => {
         setTimeout(() => setCopied(false), 2000);
       };
 
+      const handleDrop = (e) => {
+        e.preventDefault();
+        setDragging(false);
+        if (uploading) return;
+        const file = e.dataTransfer.files[0];
+        if (file) handleUpload(file);
+      };
+
+      const reset = () => { setResult(null); setError(null); if (fileRef.current) fileRef.current.value = ''; };
+
       return (
-        <div style={{width:'100%'}}>
+        <div style={{width:'100%', padding:'4px 20px', boxSizing:'border-box'}}>
+
           {!result && (
             <div
               onClick={() => !uploading && fileRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); if (!uploading) setDragging(true); }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={handleDrop}
               style={{
                 cursor: uploading ? 'default' : 'pointer',
-                border: '2px dashed #ccc',
+                border: dragging ? '2px solid #000' : '2px dashed #ccc',
                 boxShadow: '0 0 18px 2px rgba(0,0,0,0.18)',
                 borderRadius: '12px',
                 padding: '48px 16px',
@@ -120,36 +146,52 @@ app.get('/', (req, res) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px',
-                transition: 'border-color 0.2s',
-                background: '#fff',
+                gap: '10px',
+                background: dragging ? '#f9f9f9' : '#fff',
+                transition: 'border-color 0.2s, background 0.2s',
+                userSelect: 'none',
+                WebkitTapHighlightColor: 'transparent',
+                touchAction: 'manipulation',
               }}
             >
-              {uploading
-                ? <span style={{fontSize:'14px',color:'#000',fontFamily:'Orbitron,sans-serif'}}>Uploading...</span>
-                : <span style={{fontSize:'14px',fontWeight:'600',color:'#000',fontFamily:'Orbitron,sans-serif'}}>Upload File</span>
-              }
+              {uploading ? (
+                <>
+                  <div style={{width:'22px',height:'22px',border:'2px solid #eee',borderTopColor:'#000',borderRadius:'50%',animation:'spin 0.7s linear infinite'}} />
+                  <span style={{fontSize:'12px',fontWeight:'600',color:'#000',fontFamily:'Orbitron,sans-serif',letterSpacing:'0.05em'}}>UPLOADING...</span>
+                </>
+              ) : (
+                <>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={dragging ? '#000' : '#ccc'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{transition:'stroke 0.2s'}}>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span style={{fontSize:'14px',fontWeight:'600',color:'#000',fontFamily:'Orbitron,sans-serif'}}>
+                    {dragging ? 'DROP FILE' : 'UPLOAD FILE'}
+                  </span>
+                  <span className="drag-hint" style={{fontSize:'11px',color:'#ccc',fontFamily:'Orbitron,sans-serif'}}>or drag and drop</span>
+                </>
+              )}
               <input type="file" ref={fileRef} style={{display:'none'}} onChange={(e) => e.target.files[0] && handleUpload(e.target.files[0])} />
             </div>
           )}
+
+          {error && (
+            <div style={{marginTop:'12px',padding:'12px 16px',border:'1px solid #fca5a5',borderRadius:'8px',background:'#fff5f5',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <span style={{fontSize:'11px',color:'#dc2626',fontFamily:'Orbitron,sans-serif'}}>{error}</span>
+              <button onClick={reset} style={{fontSize:'11px',color:'#999',fontFamily:'Orbitron,sans-serif',background:'none',border:'none',cursor:'pointer',textDecoration:'underline'}}>RETRY</button>
+            </div>
+          )}
+
           {result && (
             <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
-              <div style={{border:'2px solid #000',borderRadius:'12px',padding:'14px 16px',display:'flex',alignItems:'center',gap:'12px',minWidth:0,background:'#fff'}}>
+              <div style={{border:'2px solid #000',borderRadius:'12px',padding:'14px 16px',display:'flex',alignItems:'center',gap:'12px',minWidth:0,background:'#fff',boxShadow:'0 0 18px 2px rgba(0,0,0,0.18)'}}>
                 <span style={{fontFamily:'Orbitron,sans-serif',fontSize:'14px',color:'#000',flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
                   {result}
                 </span>
                 <button
                   onClick={handleCopy}
-                  style={{
-                    flexShrink:0,
-                    padding:'4px',
-                    border:'none',
-                    background:'none',
-                    cursor:'pointer',
-                    color: copied ? 'green' : '#000',
-                    display:'flex',
-                    alignItems:'center',
-                  }}
+                  style={{flexShrink:0,padding:'10px',margin:'-10px',border:'none',background:'none',cursor:'pointer',color:copied ? '#16a34a' : '#000',display:'flex',alignItems:'center',transition:'color 0.2s',WebkitTapHighlightColor:'transparent',touchAction:'manipulation'}}
                 >
                   {copied
                     ? <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -158,13 +200,14 @@ app.get('/', (req, res) => {
                 </button>
               </div>
               <button
-                onClick={() => setResult(null)}
-                style={{width:'100%',padding:'10px',fontSize:'14px',color:'#000',fontWeight:'600',background:'none',border:'none',cursor:'pointer'}}
+                onClick={reset}
+                style={{width:'100%',padding:'10px',fontSize:'14px',color:'#000',fontWeight:'600',fontFamily:'Orbitron,sans-serif',background:'none',border:'none',cursor:'pointer',WebkitTapHighlightColor:'transparent',touchAction:'manipulation'}}
               >
                 Upload another file
               </button>
             </div>
           )}
+
         </div>
       );
     }
