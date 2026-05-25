@@ -33,14 +33,14 @@ async function logToZoho({ timestamp, fileName, fileType, status, url, customerI
             worksheet_name: 'Sheet1',
             json_data: [
               {
-                'TIMESTAMP': timestamp,
+                'Timestamp': timestamp,
                 'File Name - UPLOAD': fileName,
                 'File Type - UPLOAD': fileType,
                 'Stat - UPLOAD': status,
                 'Zip URL - UPLOAD': zipUrl,
                 'Image URL - UPLOAD': imageUrl,
-                'CUSTOMER ID': customerId,
-                'SOURCE ID': process.env.SOURCE_ID,
+                'Customer ID': customerId,
+                'Source ID': process.env.SOURCE_ID,
               },
             ],
           },
