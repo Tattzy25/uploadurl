@@ -76,7 +76,7 @@ app.get('/', (req, res) => {
 </head>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #fff; font-family: sans-serif; }
+  body { background: transparent; font-family: sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
 </style>
 <body>
   <div id="root"></div>
@@ -106,13 +106,14 @@ app.get('/', (req, res) => {
       };
 
       return (
-        <div style={{width:'100%',padding:'16px'}}>
+        <div style={{width:'100%',maxWidth:'480px',padding:'16px'}}>
           {!uploading && (
             <div
               onClick={() => !result && fileRef.current?.click()}
               style={{
                 cursor: result ? 'default' : 'pointer',
                 border: '2px dashed #ccc',
+                boxShadow: '0 0 18px 2px rgba(0,0,0,0.18)',
                 borderRadius: '12px',
                 padding: '48px 16px',
                 display: 'flex',
@@ -125,16 +126,16 @@ app.get('/', (req, res) => {
                 transition: 'border-color 0.2s',
               }}
             >
-              <span style={{fontSize:'14px',fontWeight:'600',color:'#000'}}>Upload File</span>
+              <span style={{fontSize:'14px',fontWeight:'600',color:'#000',fontFamily:'Orbitron,sans-serif'}}>Upload File</span>
               <input type="file" ref={fileRef} style={{display:'none'}} onChange={(e) => e.target.files[0] && handleUpload(e.target.files[0])} />
             </div>
           )}
           {uploading && (
             <div style={{border:'2px dashed #ccc',borderRadius:'12px',padding:'48px 16px',display:'flex',alignItems:'center',justifyContent:'center'}}>
-              <span style={{fontSize:'14px',color:'#000'}}>Uploading...</span>
+              <span style={{fontSize:'14px',color:'#000',fontFamily:'Orbitron,sans-serif'}}>Uploading...</span>
             </div>
           )}
-          <div style={{marginTop:'100px',display:'flex',flexDirection:'column',gap:'12px'}}>
+          <div style={{marginTop:'60px',display:'flex',flexDirection:'column',gap:'12px'}}>
             <div style={{border:'2px solid #000',borderRadius:'12px',padding:'14px 16px',display:'flex',alignItems:'center',gap:'12px',minWidth:0,background:'#fff'}}>
               <span style={{fontFamily:'Orbitron,sans-serif',fontSize:'14px',color:'#000',flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
                 {result || 'ZIP · PNG · JPEG · WEBP · JPG'}
