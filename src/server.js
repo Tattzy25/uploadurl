@@ -185,13 +185,13 @@ app.get('/', (req, res) => {
 
           {result && (
             <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
-              <div style={{border:'2px solid #000',borderRadius:'12px',padding:'14px 10px 14px 16px',display:'flex',alignItems:'center',gap:'8px',minWidth:0,background:'#fff',boxShadow:'0 0 18px 2px rgba(0,0,0,0.18)'}}>
+              <div style={{border:'2px solid #000',borderRadius:'12px',padding:'14px 16px',display:'flex',alignItems:'center',gap:'12px',minWidth:0,background:'#fff',boxShadow:'0 0 18px 2px rgba(0,0,0,0.18)'}}>
                 <span style={{fontFamily:'Orbitron,sans-serif',fontSize:'14px',color:'#000',flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
                   {result}
                 </span>
                 <button
                   onClick={handleCopy}
-                  style={{flexShrink:0,padding:'10px',border:'none',background:'none',cursor:'pointer',color:copied ? '#16a34a' : '#000',display:'flex',alignItems:'center',transition:'color 0.2s',WebkitTapHighlightColor:'transparent',touchAction:'manipulation'}}
+                  style={{flexShrink:0,padding:'4px',border:'none',background:'none',cursor:'pointer',color:copied ? '#16a34a' : '#000',display:'flex',alignItems:'center'}}
                 >
                   {copied
                     ? <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
