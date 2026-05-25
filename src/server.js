@@ -76,7 +76,7 @@ app.get('/', (req, res) => {
 </head>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { width: 100%; overflow-x: hidden; }
+  html, body { width: 100%; overflow: hidden; }
   body { background: transparent; font-family: sans-serif; }
   #root { width: 100%; }
   @keyframes spin { to { transform: rotate(360deg); } }
