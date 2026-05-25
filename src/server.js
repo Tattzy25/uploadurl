@@ -76,7 +76,7 @@ app.get('/', (req, res) => {
 </head>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: transparent; font-family: sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  body { background: transparent; font-family: sans-serif; }
 </style>
 <body>
   <div id="root"></div>
@@ -124,6 +124,7 @@ app.get('/', (req, res) => {
                 opacity: result ? 0.4 : 1,
                 pointerEvents: result ? 'none' : 'auto',
                 transition: 'border-color 0.2s',
+                background: '#fff',
               }}
             >
               <span style={{fontSize:'14px',fontWeight:'600',color:'#000',fontFamily:'Orbitron,sans-serif'}}>Upload File</span>
@@ -131,7 +132,7 @@ app.get('/', (req, res) => {
             </div>
           )}
           {uploading && (
-            <div style={{border:'2px dashed #ccc',borderRadius:'12px',padding:'48px 16px',display:'flex',alignItems:'center',justifyContent:'center'}}>
+            <div style={{border:'2px dashed #ccc',borderRadius:'12px',padding:'48px 16px',display:'flex',alignItems:'center',justifyContent:'center',background:'#fff'}}>
               <span style={{fontSize:'14px',color:'#000',fontFamily:'Orbitron,sans-serif'}}>Uploading...</span>
             </div>
           )}
